@@ -1,0 +1,39 @@
+name: Build Orcamanga
+
+# تشغيل يدوي من GitHub
+on:
+  workflow_dispatch:
+
+jobs:
+  build-orcamanga:
+    name: Build Orcamanga Only
+    runs-on: ubuntu-latest
+
+    steps:
+      # استنساخ المستودع
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # إعداد Java
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          java-version: 17
+          distribution: temurin
+
+      # إعداد Gradle
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      # بناء الإضافة
+      - name: Build Orcamanga
+        run: |
+          cd src/ar/orcamanga
+          ../../gradlew build
+
+      # رفع الـ APK أو ملفات البناء كمرفقات (اختياري)
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: orcamanga-build
+          path: src/ar/orcamanga/build/
