@@ -31,52 +31,59 @@ class OrcaManga : ParsedHttpSource(), ConfigurableSource {
     override fun setupPreferenceScreen(screen: PreferenceScreen) {
         val baseUrlPref = EditTextPreference(screen.context).apply {
             key = BASE_URL_PREF
-            title = "Base URL"
-            summary = "الرابط الأساسي للموقع (غيّره لو الموقع نقل)"
-            dialogTitle = "غيّر رابط الموقع"
+            title = "الرابط الأساسي"
+            summary = "غيّر رابط الموقع لو اتغير"
+            dialogTitle = "ادخل رابط الموقع الجديد"
             setDefaultValue(DEFAULT_BASE_URL)
         }
         screen.addPreference(baseUrlPref)
     }
 
+    // Popular
     override fun popularMangaRequest(page: Int): Request =
         GET("$baseUrl/manga-list?page=$page", headers)
 
     override fun popularMangaSelector() = "div.anime-card"
+
     override fun popularMangaFromElement(element: Element): SManga {
-        return SManga.create().apply {
-            setUrlWithoutDomain(element.select("a").attr("href"))
-            title = element.select("h3.anime-title").text()
-            thumbnail_url = element.select("img").attr("src")
-        }
+        val manga = SManga.create()
+        manga.setUrlWithoutDomain(element.select("a").attr("href"))
+        manga.title = element.select("h3.anime-title").text()
+        manga.thumbnail_url = element.select("img").attr("src")
+        return manga
     }
+
     override fun popularMangaNextPageSelector() = "a.next"
 
+    // Latest
     override fun latestUpdatesRequest(page: Int): Request =
         GET("$baseUrl/filterlist?page=$page&sort=update", headers)
 
-    override fun latestUpdatesSelector() = "div.anime-card"
+    override fun latestUpdatesSelector() = popularMangaSelector()
     override fun latestUpdatesFromElement(element: Element): SManga = popularMangaFromElement(element)
     override fun latestUpdatesNextPageSelector() = "a.next"
 
+    // Details
     override fun mangaDetailsParse(document: Document): SManga {
-        return SManga.create().apply {
-            title = document.select("h1.anime-title").text()
-            author = document.select(".author a").text()
-            genre = document.select(".genres a").joinToString(", ") { it.text() }  // ✅ أهم تعديل
-            description = document.select(".description").text()
-            thumbnail_url = document.select(".anime-cover img").attr("src")
-        }
+        val manga = SManga.create()
+        manga.title = document.select("h1.anime-title").text()
+        manga.author = document.select(".author a").text()
+        manga.genre = document.select(".genres a").joinToString { it.text() }
+        manga.description = document.select(".description").text()
+        manga.thumbnail_url = document.select(".anime-cover img").attr("src")
+        return manga
     }
 
+    // Chapters
     override fun chapterListSelector() = "ul.episodes li"
     override fun chapterFromElement(element: Element): SChapter {
-        return SChapter.create().apply {
-            setUrlWithoutDomain(element.select("a").attr("href"))
-            name = element.select("a").text()
-        }
+        val chapter = SChapter.create()
+        chapter.setUrlWithoutDomain(element.select("a").attr("href"))
+        chapter.name = element.select("a").text()
+        return chapter
     }
 
+    // Pages
     override fun pageListParse(document: Document): List<Page> {
         return document.select("div.reader-images img").mapIndexed { i, el ->
             Page(i, "", el.attr("src"))
@@ -84,7 +91,7 @@ class OrcaManga : ParsedHttpSource(), ConfigurableSource {
     }
 
     override fun imageUrlParse(document: Document): String =
-        document.selectFirst("img")!!.attr("src")
+        document.select("img").attr("src")
 
     companion object {
         private const val BASE_URL_PREF = "base_url"
