@@ -1,10 +1,8 @@
 ext {
-    extName = 'Orca Manga'
+    extName = 'OrcaManga'
     extClass = '.OrcaManga'
-    themePkg = 'madara'
-    baseUrl = 'https://orcamanga.site'
-    overrideVersionCode = 8
-    isNsfw = false
+    extVersionCode = 1
+    libVersion = '1.5'
 }
 
 apply from: "$rootDir/common.gradle"
