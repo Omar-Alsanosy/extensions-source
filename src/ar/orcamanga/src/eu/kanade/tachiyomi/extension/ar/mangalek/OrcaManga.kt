@@ -44,11 +44,11 @@ class OrcaManga : ParsedHttpSource(), ConfigurableSource {
 
     override fun popularMangaSelector() = "div.anime-card"
     override fun popularMangaFromElement(element: Element): SManga {
-        val manga = SManga.create()
-        manga.setUrlWithoutDomain(element.select("a").attr("href"))
-        manga.title = element.select("h3.anime-title").text()
-        manga.thumbnail_url = element.select("img").attr("src")
-        return manga
+        return SManga.create().apply {
+            setUrlWithoutDomain(element.select("a").attr("href"))
+            title = element.select("h3.anime-title").text()
+            thumbnail_url = element.select("img").attr("src")
+        }
     }
     override fun popularMangaNextPageSelector() = "a.next"
 
@@ -60,21 +60,21 @@ class OrcaManga : ParsedHttpSource(), ConfigurableSource {
     override fun latestUpdatesNextPageSelector() = "a.next"
 
     override fun mangaDetailsParse(document: Document): SManga {
-        val manga = SManga.create()
-        manga.title = document.select("h1.anime-title").text()
-        manga.author = document.select(".author a").text()
-        manga.genre = document.select(".genres a").joinToString { it.text() }
-        manga.description = document.select(".description").text()
-        manga.thumbnail_url = document.select(".anime-cover img").attr("src")
-        return manga
+        return SManga.create().apply {
+            title = document.select("h1.anime-title").text()
+            author = document.select(".author a").text()
+            genre = document.select(".genres a").joinToString(", ") { it.text() }  // ✅ أهم تعديل
+            description = document.select(".description").text()
+            thumbnail_url = document.select(".anime-cover img").attr("src")
+        }
     }
 
     override fun chapterListSelector() = "ul.episodes li"
     override fun chapterFromElement(element: Element): SChapter {
-        val chapter = SChapter.create()
-        chapter.setUrlWithoutDomain(element.select("a").attr("href"))
-        chapter.name = element.select("a").text()
-        return chapter
+        return SChapter.create().apply {
+            setUrlWithoutDomain(element.select("a").attr("href"))
+            name = element.select("a").text()
+        }
     }
 
     override fun pageListParse(document: Document): List<Page> {
@@ -83,7 +83,8 @@ class OrcaManga : ParsedHttpSource(), ConfigurableSource {
         }
     }
 
-    override fun imageUrlParse(document: Document): String = document.select("img").attr("src")
+    override fun imageUrlParse(document: Document): String =
+        document.selectFirst("img")!!.attr("src")
 
     companion object {
         private const val BASE_URL_PREF = "base_url"
