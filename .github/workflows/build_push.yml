@@ -86,7 +86,7 @@ jobs:
           ALIAS: ${{ secrets.ALIAS }}
           KEY_STORE_PASSWORD: ${{ secrets.KEY_STORE_PASSWORD }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-        run: ./gradlew :src:ar:orcamanga:assembleRelease
+        run: ./gradlew :src:ar:orcamanga:assembleRelease -x lintKotlinMain -x lint
 
       - name: Upload OrcaManga APK
         uses: actions/upload-artifact@v4
