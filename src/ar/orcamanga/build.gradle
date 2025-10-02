@@ -1,8 +1,11 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+
 ext {
     extName = 'OrcaManga'
     extClass = '.OrcaManga'
-    extVersionCode = 1
-    libVersion = '1.5'
+    baseUrl = 'https://orcamanga.site'
+    overrideVersionCode = 1
 }
 
 apply from: "$rootDir/common.gradle"
